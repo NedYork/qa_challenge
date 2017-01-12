@@ -1,5 +1,6 @@
 var Nightmare = require('./lib/nightmare');
 var vo = require('vo');
+var fs = require('fs');
 
 const airportCityNameMapping = {
   'DXB': 'Dubai',
@@ -86,10 +87,17 @@ function* gen(destinationAirport, destinationCity, departureDate, returnDate) {
     .evaluate(() => {
       var list = document.getElementsByClassName("price");
       for (var i = 0; i < list.length; i++) {
-        // If the innerText HTML is zero aka price is zero,
-        if (Number(list[i].innerText) === 0) {
+        // If the innerText HTML is less than specified amount aka price is sub-100,
+        if (Number(list[i].innerText) < 100) {
           return list;
           // then write down Date and Destination into file
+          // http://stackoverflow.com/questions/2496710/writing-files-in-node-js
+          // fs.writeFile("/tmp/test", "Hey there!", function(err) {
+          //   if(err) {
+          //     return console.log(err);
+          //   }
+          //   console.log("The file was saved!");
+          // });
         }
       }
       return list;

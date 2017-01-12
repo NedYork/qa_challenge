@@ -76,10 +76,10 @@ function* gen(destinationAirport, destinationCity, departureDate, returnDate) {
     .evaluate(() => {
       document.getElementById("fromStation").value = "JFK";
       document.getElementById("autocompleteFrom").value = "New York";
-      document.getElementById("toStation").value = destinationAirport;
-      document.getElementById("autocompleteTo").value = destinationCity;
-      document.getElementById("departing").value = departureDate;
-      document.getElementById("returning").value = returnDate;
+      document.getElementById("toStation").value = 'DXB';
+      document.getElementById("autocompleteTo").value = 'Dubai';
+      document.getElementById("departing").value = '02-Feb-2017';
+      document.getElementById("returning").value = '13-Feb-2017';
     })
     .click('form[id="homeSearch"] [id=bookFlight]')
     .wait('button[id="indexItinerarayContinue"]')

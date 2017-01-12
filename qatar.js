@@ -24,21 +24,38 @@ const monthLastDayMapping = {
   'Mar': 31,
   'Apr': 30
 }
-// Date Format
-// 08-Apr-2017
 
-// vo(run)(function(err) {
-//   if (err) throw err
-// });
-vo(gen)(function(err) {
+vo(run)(function(err) {
   if (err) throw err
 });
 
-// function* run() {
-//   var results = yield * forEach(validEmails, gen);
-//   console.log(results);
-// }
-//
+function* run() {
+  const airports = Object.keys(airportCityNameMapping);
+  const results = yield * forEach(airports, gen);
+  console.log(results);
+}
+
+function* forEach(airports, func) { // NEEDED BECAUSE FOREACH DOESN'T WORK IN GENERATORS
+  let i;
+  const results = [];
+  for (i = 0; i < airports.length; i++) {
+    // "19-Jan-2017"
+    const currentAirport = airports[i];
+    const currentDestinationCity = airportCityNameMapping[currentAirport];
+    const availableMonths = airportMonthMapping[airports[i]];
+    let j;
+    for (j = 0; j < availableMonths.length; j++) {
+      const currentMonth = availableMonths[j];
+      const lastDayOfCurrentMonth = monthLastDayMapping[currentMonth];
+      // for (k = 1; k < lastDayOfCurrentMonth; k++) {
+        // const dateStr = "";
+          results.push(yield * func(currentAirport, currentDestinationCity, "19-Jan-2017", "29-Jan-2017"));
+      // }
+    }
+  }
+  return results;
+}
+
 // function* forEach(arr, fn) { // NEEDED BECAUSE FOREACH DOESN'T WORK IN GENERATORS
 //   let i;
 //   var results = [];
@@ -48,63 +65,41 @@ vo(gen)(function(err) {
 //   return results;
 // }
 
-function* gen() {
+function* gen(destinationAirport, destinationCity, departureDate, returnDate) {
   const nbot = Nightmare({
     show: true
   });
+
   yield nbot.goto('http://www.qatarairways.com/de/en/homepage.page');
-  // var timeA = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
-  // var timeB = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
-  // var timeC = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
-  // var timeD = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
-  // var timeE = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
-  // var timeF = Math.floor((Math.random() * 1000) + (Math.random() * 2000));
 
   var value = yield nbot.wait('form[id="homeSearch"]')
     .evaluate(() => {
-      document.getElementById("fromStation").value="JFK";
-      document.getElementById("autocompleteFrom").value="New York"
-      document.getElementById("toStation").value="DXB";
-      document.getElementById("autocompleteFrom").value="Dubai"
+      document.getElementById("fromStation").value = "JFK";
+      document.getElementById("autocompleteFrom").value = "New York";
+      document.getElementById("toStation").value = destinationAirport;
+      document.getElementById("autocompleteTo").value = destinationCity;
+      document.getElementById("departing").value = departureDate;
+      document.getElementById("returning").value = returnDate;
     })
-    // .type('form[id*="homeSearch"] [id=FromTemp]', "NYC")
-    // .wait(timeB)
-    .wait('form[id="homeSearcha"]')
-    .check('form[action*="/create_entry"] [id=email_user_gender_m]')
-    // .wait(timeC)
-    .select('form[action*="/create_entry"] [id=email_user_birth_date_2i]', 5)
-    // .wait(timeD)
-    .select('form[action*="/create_entry"] [id=email_user_birth_date_3i]', 2)
-    // .wait(timeE)
-    .select('form[action*="/create_entry"] [id=email_user_birth_date_1i]', 1993)
-    // .wait(timeF)
-    .click('form[action*="/create_entry"] [type=submit]')
-    .evaluate(function () {
-      return document.querySelector('#sweeps-thankyou .sweeps-header h1')
+    .click('form[id="homeSearch"] [id=bookFlight]')
+    .wait('button[id="indexItinerarayContinue"]')
+    .evaluate(() => {
+      var list = document.getElementsByClassName("price");
+      for (var i = 0; i < list.length; i++) {
+        // If the innerText HTML is zero aka price is zero,
+        if (Number(list[i].innerText) === 0) {
+          return list;
+          // then write down Date and Destination into file
+        }
+      }
+      return list;
     })
-    .wait(15000)
-    .then(function (result) {
-      console.log('Success:', num)
+    .then(function (res) {
+      console.log('completed this round', res)
     })
     .catch(function (error) {
-      console.error('Failed:', error);
+      console.error('failed this round', error);
     });
 
   yield nbot.end();
 }
-
-// nightmare
-//   .goto('http://yahoo.com')
-//   .type('form[action*="/search"] [name=p]', 'github nightmare')
-//   .click('form[action*="/search"] [type=submit]')
-//   .wait('#main')
-//   .evaluate(function () {
-//     return document.querySelector('#main .searchCenterMiddle li a').href
-//   })
-//   .end()
-//   .then(function (result) {
-//     console.log(result)
-//   })
-//   .catch(function (error) {
-//     console.error('Search failed:', error);
-//   });
